@@ -206,13 +206,16 @@ addEventListener('keydown',event=>{if(event.key==='Escape'&&narrow.matches&&menu
 // Finite, initial-HTML catalog with IME-safe search and shareable filter state.
 let category='Все',composing=false;
 const search=$('[data-search]'),cards=$$('[data-product-card]');
+const filterMotion = window.ArtTimeFilterMotion.create(cards, {isPaused: () => paused});
 function filterCatalog(writeURL=true){
+  const filterSnapshot = writeURL ? filterMotion.capture() : null;
   const query=search.value.trim().toLocaleLowerCase('ru');
   let count=0;
   cards.forEach(card=>{const item=data.catalog.find(x=>x.id===card.dataset.id);const matches=(category==='Все'||item.category===category)&&[item.title,item.category,item.description,item.specification].join(' ').toLocaleLowerCase('ru').includes(query);card.hidden=!matches;if(matches)count++;});
   $$('[data-filter]').forEach(button=>button.setAttribute('aria-pressed',String(button.dataset.filter===category)));
   $('.catalog-empty').hidden=count>0;text('.catalog-status',`${count} ${count===1?'предмет':count>1&&count<5?'предмета':'предметов'}`);
   if(writeURL){const url=new URL(location.href);if(category==='Все')url.searchParams.delete('category');else url.searchParams.set('category',category);if(query)url.searchParams.set('q',search.value.trim());else url.searchParams.delete('q');history.replaceState(null,'',url);}
+  filterMotion.play(filterSnapshot);
   queueMotion();
 }
 $$('[data-filter]').forEach(button=>button.addEventListener('click',()=>{category=button.dataset.filter;filterCatalog();}));
