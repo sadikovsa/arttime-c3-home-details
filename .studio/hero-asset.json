@@ -1,0 +1,28 @@
+{
+  "slug": "arttime-c3-home-details",
+  "name": "hero-room",
+  "generatedOriginal": "exec-1461694e-a9ec-4ac2-8005-5687d7ce4784.png",
+  "mode": "RGB",
+  "alpha": null,
+  "variants": {
+    "640": {
+      "path": "assets/img/hero-room-640.webp",
+      "width": 640,
+      "height": 360,
+      "bytes": 44126
+    },
+    "960": {
+      "path": "assets/img/hero-room-960.webp",
+      "width": 960,
+      "height": 540,
+      "bytes": 86016
+    },
+    "1672": {
+      "path": "assets/img/hero-room-1672.webp",
+      "width": 1672,
+      "height": 941,
+      "bytes": 200492
+    }
+  },
+  "usage": "hero-illustration-not-client-case; original official photos used in catalog and factual gallery"
+}

@@ -1,0 +1,5 @@
+/* Unicode-only local symbol faces. Display/body fonts stay unchanged. */
+@font-face{font-family:'Commissioner';font-style:normal;font-weight:400 600;font-display:swap;src:url('../fonts/arrows.ttf') format('truetype');unicode-range:U+2190-21FF,U+2160-216F,U+25B6-25B7}
+@font-face{font-family:'Commissioner';font-style:normal;font-weight:400 600;font-display:swap;src:url('../fonts/controls.ttf') format('truetype');unicode-range:U+23F5-23FA}
+@font-face{font-family:'Commissioner';font-style:italic;font-weight:400 600;font-display:swap;src:url('../fonts/arrows.ttf') format('truetype');unicode-range:U+2190-21FF,U+2160-216F,U+25B6-25B7}
+@font-face{font-family:'Commissioner';font-style:italic;font-weight:400 600;font-display:swap;src:url('../fonts/controls.ttf') format('truetype');unicode-range:U+23F5-23FA}
