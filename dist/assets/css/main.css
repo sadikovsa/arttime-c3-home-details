@@ -4,3 +4,11 @@
 @media(max-width:420px){.room-story{grid-template-columns:1fr;gap:28px}.room-story__intro h2{font-size:32px}.story-object{display:flex;gap:20px}.story-object>img,.story-object>a{width:38%;height:175px}.story-object>div{padding-top:0}.story-object>div>p:not(.eyebrow){font-size:13px}.story-object h3{font-size:20px}.case__photo img,.case:nth-child(2) .case__photo img,.inspirations-grid .case__photo img{height:240px}.case:first-child .case__photo img{height:360px}.case h3{font-size:19px}.product h3{font-size:16px}.product>.text-button{font-size:12px}.room-tabs button{padding-inline:10px}.room-viewport{height:460px}.motion-ready .room-scene{height:calc(525px + 35svh)}.room-note{max-width:160px}.room-note p{font-size:21px}.header .brand{font-size:19px}.header__phone{font-size:11px}}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto;transition-duration:0s;animation-duration:0s}.room-visual{will-change:auto}.room-note{opacity:0}.case__photo:hover img,.product__photo:hover img,.text-button:hover span{transform:none}}
 .mobile-hotspots.js-only{display:none}.motion-ready .room-scene{height:calc(var(--stage-height,815px) + var(--scroll-span,70svh))}@media(max-width:760px){.hotspots{display:none}.js .mobile-hotspots{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));background:var(--paper);gap:0;padding:6px 14px}.mobile-hotspots button{font-size:12px;text-align:left;display:flex;gap:9px;align-items:center;justify-content:center;padding:5px}.mobile-hotspots button>span:first-child{color:var(--muted);font-size:10px}.motion-ready .room-scene{height:calc(var(--stage-height,615px) + var(--scroll-span,38svh))}}
+
+/* No-JS visitors use the visible phone/Instagram contacts instead of an inactive local form. */
+html:not(.js) #request-form{display:none}
+
+/* Match the final collapsed mobile menu during the first paint, before external JS arrives. */
+@media(max-width:760px){html.js:not(.ui-ready) .menu>.disclosure{display:none}}
+
+@media(prefers-reduced-motion:reduce){.disclosure-sign{transition:none!important}}

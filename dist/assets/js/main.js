@@ -198,9 +198,9 @@ $$('[data-accordion]').forEach(details => {
   });
 });
 const menu=$('.menu');
-menu.open=!narrow.matches;
+menu.open=!narrow.matches;root.classList.add("ui-ready");
 narrow.addEventListener('change',()=>{const s=disclosures.get(menu);if(s)s.animation.cancel();disclosures.delete(menu);menu.style.height='';menu.style.overflow='';menu.open=!narrow.matches;measureScene();});
-function closeMenu(){const pending=disclosures.get(menu);if(pending)pending.animation.cancel();disclosures.delete(menu);menu.style.height='';menu.style.overflow='';menu.open=false;measureScene();}
+function closeMenu(){const pending=disclosures.get(menu);if(pending?.target===false||(!menu.open&&!pending))return;$('summary',menu).click();}
 $('.menu nav').addEventListener('click',event=>{if(narrow.matches&&event.target.closest('a'))closeMenu();});
 addEventListener('keydown',event=>{if(event.key==='Escape'&&narrow.matches&&menu.open&&!$('dialog[open]')){closeMenu();$('[data-menu-toggle]').focus();}});
 // Finite, initial-HTML catalog with IME-safe search and shareable filter state.
