@@ -8,16 +8,18 @@ root.classList.add('js');
 const $ = (selector, scope = document) => scope.querySelector(selector);
 const $$ = (selector, scope = document) => [...scope.querySelectorAll(selector)];
 const text = (selector, value) => { $(selector).textContent = value; };
+const motion = window.ArtTimeMotion.create(()=>!reduced.matches&&!paused);
 let dialogOpener = null;
 function openDialog(dialog, opener) {
   dialogOpener = opener;
   dialog.showModal();
-  $('[data-dialog-close]', dialog).focus();
+  $('[data-dialog-close]', dialog).focus();motion.enter(dialog,opener,'y');
 }
 $$('dialog').forEach(dialog => {
-  $('[data-dialog-close]', dialog).addEventListener('click', () => dialog.close());
-  dialog.addEventListener('click', event => { if (event.target === dialog) { const r = dialog.getBoundingClientRect(); if (event.clientX < r.left || event.clientX > r.right || event.clientY < r.top || event.clientY > r.bottom) dialog.close(); } });
-  dialog.addEventListener('close', () => {
+  $('[data-dialog-close]', dialog).addEventListener('click', () => motion.close(dialog));
+  dialog.addEventListener('click', event => { if (event.target === dialog) { const r = dialog.getBoundingClientRect(); if (event.clientX < r.left || event.clientX > r.right || event.clientY < r.top || event.clientY > r.bottom) motion.close(dialog); } });
+  dialog.addEventListener('cancel',e=>{e.preventDefault();motion.close(dialog);});
+  dialog.addEventListener('close', () => {motion.scope(dialog);
     const opener = dialogOpener;
     dialogOpener = null;
     if (opener && opener.isConnected && opener.getClientRects().length) opener.focus({preventScroll: true});
@@ -111,14 +113,19 @@ function applyRoom(key) {
   [0,1].forEach(i => {text(`#story-title-${i+1}`,room.titles[i]);text(`#story-text-${i+1}`,room.short[i]);});
   positionHotspots(); queueMotion();
 }
-$$('[data-room]').forEach(button => button.addEventListener('click', () => {
-  const key = button.dataset.room;
-  const generation = ++roomGeneration;
-  const image = new Image(); image.src = rooms[key].image;
-  image.onload = () => { if (generation !== roomGeneration) return; applyRoom(key); };
-  image.onerror = () => { if (generation===roomGeneration) applyRoom(key); };
-  if (image.complete && image.naturalWidth) { image.onload=null; applyRoom(key); }
-}));
+function roomAccents(){if(reduced.matches||paused)return;$$('.hotspot-focus').forEach(n=>{motion.cancel(n);n.remove();});
+ const targets=narrow.matches?$$('.mobile-hotspots button'):$$('.hotspot');targets.forEach((button,i)=>{button.style.position=button.classList.contains('hotspot')?'absolute':'relative';const ring=document.createElement('span');ring.className='hotspot-focus';ring.setAttribute('aria-hidden','true');button.append(ring);setTimeout(()=>{if(!ring.isConnected)return;motion.run(ring,[{opacity:0,transform:'scale(.9)'},{opacity:.8,transform:'scale(1)',offset:.45},{opacity:0,transform:'scale(1.12)'}],420,()=>ring.remove());},i*150);});
+}
+function switchRoom(key){const generation=++roomGeneration;const image=new Image();image.src=rooms[key].image;
+ const present=()=>{if(generation!==roomGeneration)return;const before=roomImage.cloneNode(false);before.removeAttribute('id');before.removeAttribute('srcset');before.removeAttribute('sizes');before.src=roomImage.currentSrc;before.alt='';
+  $$('.room-photo-old').forEach(n=>{motion.cancel(n);n.remove();});$$('.hotspot-focus').forEach(n=>{motion.cancel(n);n.remove();});applyRoom(key);
+  if(reduced.matches||paused)return;
+  const layer=document.createElement('div');layer.className='room-photo-old';layer.setAttribute('aria-hidden','true');layer.inert=true;layer.append(before);visual.append(layer);
+  const direction=key==='hall'?-1:1;motion.run(layer,[{clipPath:'inset(0 0 0 0)'},{clipPath:direction>0?'inset(0 0 0 100%)':'inset(0 100% 0 0)'}],narrow.matches?480:620,()=>layer.remove());roomAccents();
+ };
+ image.decode().then(present,()=>{if(generation===roomGeneration)applyRoom(key);});
+}
+$$('[data-room]').forEach(button=>button.addEventListener('click',()=>switchRoom(button.dataset.room)));
 roomImage.addEventListener('load', () => {positionHotspots();measureScene();});
 const detailDialog = $('#detail-dialog');
 $$('[data-detail]').forEach(button => button.addEventListener('click', () => {
@@ -167,11 +174,14 @@ function updateMotion() {
 }
 function queueMotion(){ if(!ticking){ticking=true;requestAnimationFrame(updateMotion);} }
 function setMotionMode(){root.classList.toggle('motion-ready',!reduced.matches);const b=$('[data-motion-toggle]');b.disabled=reduced.matches;b.setAttribute('aria-pressed',String(paused||reduced.matches));b.firstChild.textContent=reduced.matches?'Движение уменьшено ':paused?'Включить движение ':'Остановить движение ';measureScene();}
-$('[data-motion-toggle]').addEventListener('click',()=>{paused=!paused;setMotionMode();});
+$('[data-motion-toggle]').addEventListener('click',()=>{paused=!paused;root.classList.toggle('motion-paused',paused);setMotionMode();});
 addEventListener('scroll',queueMotion,{passive:true});addEventListener('resize',measureScene,{passive:true});
 reduced.addEventListener('change',setMotionMode);narrow.addEventListener('change',measureScene);
 if(document.fonts)document.fonts.ready.then(measureScene);
-setMotionMode();positionHotspots();
+motion.bind($('[data-motion-toggle]'),reduced);
+const replay=$('[data-motion-replay]');replay.hidden=false;replay.disabled=reduced.matches;reduced.addEventListener('change',()=>{replay.disabled=reduced.matches;});
+replay.addEventListener('click',()=>{if(reduced.matches)return;if(paused)$('[data-motion-toggle]').click();scrollTo({top:0,behavior:'instant'});roomAccents();});
+setMotionMode();positionHotspots();roomImage.decode().then(()=>requestAnimationFrame(()=>requestAnimationFrame(roomAccents))).catch(()=>{});
 // Native details retains no-JS behavior; reverse from the current animated height.
 const disclosures=new WeakMap();
 $$('[data-accordion]').forEach(details => {
@@ -227,8 +237,8 @@ if($$('[data-filter]').some(b=>b.dataset.filter===params.get('category')))catego
 const galleryDialog=$('#gallery-dialog');let galleryIndex=0;
 function renderGallery(){const item=data.gallery[galleryIndex];const img=$('#gallery-image');img.src=item.image;img.alt=item.title;img.width=item.width;img.height=item.height;text('#gallery-title',item.title);text('#gallery-description',item.description);text('#gallery-count',`${galleryIndex+1} / ${data.gallery.length} · ${galleryIndex<5?'Наполнение интерьера':'Интерьерный пример'}`);}
 $$('[data-gallery]').forEach(button=>button.addEventListener('click',event=>{event.preventDefault();galleryIndex=Number(button.dataset.gallery);renderGallery();openDialog(galleryDialog,button);}));
-$('[data-gallery-prev]').addEventListener('click',()=>{galleryIndex=(galleryIndex+data.gallery.length-1)%data.gallery.length;renderGallery();});
-$('[data-gallery-next]').addEventListener('click',()=>{galleryIndex=(galleryIndex+1)%data.gallery.length;renderGallery();});
+$('[data-gallery-prev]').addEventListener('click',()=>{galleryIndex=(galleryIndex+data.gallery.length-1)%data.gallery.length;motion.swap($('#gallery-image'),renderGallery,-1,narrow.matches?340:430);});
+$('[data-gallery-next]').addEventListener('click',()=>{galleryIndex=(galleryIndex+1)%data.gallery.length;motion.swap($('#gallery-image'),renderGallery,1,narrow.matches?340:430);});
 galleryDialog.addEventListener('keydown',event=>{if(event.key==='ArrowLeft')$('[data-gallery-prev]').click();if(event.key==='ArrowRight')$('[data-gallery-next]').click();});
 // Editable inquiry stays local. TXT and clipboard use the edited draft verbatim.
 $('#request-form').addEventListener('submit',event=>{
