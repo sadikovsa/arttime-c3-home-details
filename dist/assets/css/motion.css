@@ -1,0 +1,20 @@
+/* Motion wrappers own decoration, leaving native scene transforms independent. */
+.motion-photo-exit,.motion-photo-transfer{max-width:none;pointer-events:none}
+dialog{overflow-x:hidden}
+.motion-paused *, .motion-paused *::before,.motion-paused *::after{transition:none!important}
+.motion-replay{min-height:44px;padding:8px 12px;font-size:12px;display:inline-flex;align-items:center;gap:8px;border:1px solid currentColor;background:transparent}
+.motion-replay:disabled{opacity:.6;cursor:default}
+.sculpture-sheen{position:absolute;pointer-events:none;z-index:2;mask-repeat:no-repeat;mask-size:100% 100%;-webkit-mask-repeat:no-repeat;-webkit-mask-size:100% 100%;overflow:hidden}
+.sheen-ribbon{position:absolute;inset:0;width:240%;background:linear-gradient(108deg,transparent 32%,rgba(210,222,255,.25) 40%,rgba(255,255,255,.94) 47%,rgba(255,255,255,.42) 50%,transparent 59%)}
+.hero-copy .motion-replay{display:flex;width:max-content;margin-top:14px;color:var(--cobalt)}
+.room-replay{position:absolute;right:20px;top:72px;z-index:6;background:var(--paper);color:var(--ink)}
+/* Keep the outgoing photograph inside the transformed photo context. */
+.room-photo-old{position:absolute;inset:0;pointer-events:none;z-index:1;overflow:hidden}
+.room-photo-old>img{width:100%;height:100%;object-fit:cover;object-position:50% 55%}
+.room-visual .hotspots{position:absolute;inset:0;z-index:2;pointer-events:none}
+.room-visual .hotspot{pointer-events:auto}
+.hero-title,.room-note{z-index:3}
+.motion-control{z-index:4}
+.hotspot-focus{position:absolute;inset:-10px;pointer-events:none;border:2px solid var(--olive);opacity:0}
+@media(max-width:760px){.hero-copy .motion-replay{font-size:11px;margin-top:10px}.room-replay{right:16px;top:62px;font-size:11px}.hotspot-focus{inset:-4px}}
+@media(prefers-reduced-motion:reduce){.sculpture-sheen,.room-photo-old,.hotspot-focus{display:none}}
